@@ -1,4 +1,4 @@
-# 📝 MY NOTE - Aplicativo de Notas Mobile  
+# 📝 MY NOTE - Aplicativo de Notas
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)  
 ![GitHub stars](https://img.shields.io/github/stars/SEU_USUARIO/my-note?style=social)  
