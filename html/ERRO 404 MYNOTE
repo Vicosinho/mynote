@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Página não encontrada | My Note</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #6C5CE7;
+      --primary-light: #8378e9;
+      --secondary-color: #00CEFF;
+      --accent-color: #FF7675;
+      --dark-color: #2D3436;
+      --light-color: #F5F6FA;
+      --text-color: #2D3436;
+      --text-light: #636E72;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, var(--light-color), var(--secondary-color));
+      color: var(--text-color);
+      text-align: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .error-container {
+      max-width: 500px;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.8s ease;
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      animation: bounce 1s infinite;
+    }
+
+    .error-message {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      color: var(--text-light);
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 25px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .home-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .error-code {
+        font-size: 4rem;
+      }
+
+      .error-message {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-message">Página não encontrada</div>
+    <a href="/" class="home-btn"><i class="fas fa-home"></i> Voltar para a página inicial do app My Note</a>
+  </div>
+</body>
+
+</html>
