@@ -49,3 +49,6 @@ Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvi
 - **Google Fonts (Poppins)** – Tipografia  
 
 ---
+
+** Para usar o app clique no link abaixo: **
+
