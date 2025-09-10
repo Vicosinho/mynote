@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MY NOTE - Avançado</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #6C5CE7;
+      --secondary-color: #00CEFF;
+      --dark-color: #2D3436;
+      --light-color: #F5F6FA;
+      --border-color: #DFE6E9;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: var(--light-color);
+      color: var(--dark-color);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: var(--primary-color);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 300px;
+      background: white;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .new-note-btn {
+      margin: 15px;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .note-list {
+      overflow-y: auto;
+      flex-grow: 1;
+      padding: 10px;
+    }
+
+    .note-item {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      background: var(--light-color);
+      transition: all 0.2s;
+    }
+
+    .note-item:hover {
+      transform: translateX(5px);
+    }
+
+    .note-item.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .note-title {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .note-preview {
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+
+    .editor {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-toolbar {
+      padding: 10px 20px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+
+    .toolbar-btn {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .toolbar-btn:hover {
+      background: var(--light-color);
+    }
+
+    #note-title {
+      padding: 20px;
+      font-size: 1.5rem;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      outline: none;
+    }
+
+    #note-content {
+      flex-grow: 1;
+      padding: 20px;
+      border: none;
+      resize: none;
+      outline: none;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .status-bar {
+      padding: 10px 20px;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      color: #636E72;
+    }
+
+    .dark-mode {
+      background: var(--dark-color);
+      color: var(--light-color);
+    }
+
+    .dark-mode .sidebar,
+    .dark-mode .editor-toolbar,
+    .dark-mode .status-bar,
+    .dark-mode #note-title,
+    .dark-mode #note-content {
+      background: #3B3B3B;
+      color: var(--light-color);
+      border-color: #444;
+    }
+
+    .dark-mode .note-item {
+      background: #444;
+    }
+
+    .dark-mode .note-item.active {
+      background: var(--primary-color);
+    }
+
+    .dark-mode .toolbar-btn {
+      background: #444;
+      color: var(--light-color);
+      border-color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div>
+      <button class="menu-btn" id="menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span>MY NOTE v3.0</span>
+    </div>
+    <div>
+      <button id="theme-btn">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Suas Notas</h2>
+      </div>
+
+      <button class="new-note-btn" id="new-note-btn">
+        <i class="fas fa-plus"></i> Nova Nota
+      </button>
+
+      <div class="note-list" id="note-list">
+        <!-- Notas serão carregadas aqui -->
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-toolbar">
+        <button class="toolbar-btn" id="bold-btn">
+          <i class="fas fa-bold"></i>
+        </button>
+        <button class="toolbar-btn" id="italic-btn">
+          <i class="fas fa-italic"></i>
+        </button>
+        <button class="toolbar-btn" id="underline-btn">
+          <i class="fas fa-underline"></i>
+        </button>
+      </div>
+
+      <input type="text" id="note-title" placeholder="Título da nota...">
+      <textarea id="note-content" placeholder="Comece a escrever aqui..."></textarea>
+
+      <div class="status-bar">
+        <span id="char-count">0 caracteres</span>
+        <span id="last-saved">Não salvo</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let notes = JSON.parse(localStorage.getItem('notes')) || [];
+      let currentNoteId = null;
+      let darkMode = localStorage.getItem('darkMode') === 'true';
+      // Aplicar modo escuro se estava ativo
+      if (darkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-btn').innerHTML = '<i class="fas fa-sun"></i>';
+      }
+
+      function saveNotes() {
+        localStorage.setItem('notes', JSON.stringify(notes));
+        updateLastSaved();
+      }
+
+      function renderNotes() {
+        const noteList = document.getElementById('note-list');
+        noteList.innerHTML = '';
+        if (notes.length === 0) {
+          noteList.innerHTML = '<div class="note-item">Nenhuma nota criada</div>';
+          return;
+        }
+        notes.forEach(note => {
+          const noteElement = document.createElement('div');
+          noteElement.className = 'note-item';
+          if (note.id === currentNoteId) noteElement.classList.add('active');
+          noteElement.innerHTML = `
+            <div class="note-title">${note.title || 'Sem título'}</div>
+            <div class="note-preview">${note.content.substring(0, 50)}...</div>
+          `;
+          noteElement.addEventListener('click', () => {
+            loadNote(note.id);
+          });
+          noteList.appendChild(noteElement);
+        });
+      }
+
+      function loadNote(id) {
+        const note = notes.find(n => n.id === id);
+        if (!note) return;
+        currentNoteId = id;
+        document.getElementById('note-title').value = note.title;
+        document.getElementById('note-content').value = note.content;
+        updateCharCount();
+        renderNotes();
+        // Fechar a sidebar em mobile após selecionar uma nota
+        if (window.innerWidth < 768) {
+          document.getElementById('sidebar').classList.remove('open');
+        }
+      }
+
+      function updateCharCount() {
+        const content = document.getElementById('note-content').value;
+        document.getElementById('char-count').textContent = `${content.length} caracteres`;
+      }
+
+      function updateLastSaved() {
+        document.getElementById('last-saved').textContent = `Salvo: ${new Date().toLocaleTimeString()}`;
+      }
+
+      function formatText(command) {
+        document.execCommand(command, false, null);
+        document.getElementById('note-content').focus();
+      }
+      // Event listeners
+      document.getElementById('new-note-btn').addEventListener('click', function() {
+        const newNote = {
+          id: Date.now(),
+          title: 'Nova Nota',
+          content: '',
+          createdAt: new Date()
+        };
+        notes.unshift(newNote);
+        saveNotes();
+        loadNote(newNote.id);
+        renderNotes();
+      });
+      document.getElementById('note-title').addEventListener('input', function() {
+        if (currentNoteId) {
+          const note = notes.find(n => n.id === currentNoteId);
+          if (note) note.title = this.value;
+          saveNotes();
+          renderNotes();
+        }
+      });
+      document.getElementById('note-content').addEventListener('input', function() {
+        if (currentNoteId) {
+          const note = notes.find(n => n.id === currentNoteId);
+          if (note) note.content = this.value;
+          saveNotes();
+          updateCharCount();
+        }
+      });
+      document.getElementById('menu-btn').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+      document.getElementById('theme-btn').addEventListener('click', function() {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', darkMode);
+        if (darkMode) {
+          this.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          this.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+      document.getElementById('bold-btn').addEventListener('click', () => formatText('bold'));
+      document.getElementById('italic-btn').addEventListener('click', () => formatText('italic'));
+      document.getElementById('underline-btn').addEventListener('click', () => formatText('underline'));
+      // Carregar a primeira nota se existir
+      if (notes.length > 0) {
+        loadNote(notes[0].id);
+      }
+      renderNotes();
+    });
+  </script>
+</body>
+
+</html>
