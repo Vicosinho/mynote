@@ -50,5 +50,4 @@ Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvi
 
 ---
 
-** Para usar o app clique no link abaixo: **
-
+👉 **[Acesse o aplicativo aqui]([https://SEU_USUARIO.github.io/my-note/](https://rawcdn.githack.com/Vicosinho/mynote/refs/heads/main/html/5.9))** 
