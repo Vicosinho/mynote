@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MY NOTE - Mobile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Adicionando SDKs do Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #6C5CE7;
+      --primary-light: #8378e9;
+      --secondary-color: #00CEFF;
+      --accent-color: #FF7675;
+      --dark-color: #2D3436;
+      --light-color: #F5F6FA;
+      --success-color: #00B894;
+      --warning-color: #FDCB6E;
+      --error-color: #D63031;
+      --border-color: #DFE6E9;
+      --text-color: #2D3436;
+      --text-light: #636E72;
+      --header-height: 60px;
+      --toolbar-height: 50px;
+      --status-height: 40px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    body {
+      background: linear-gradient(135deg, #F5F6FA 0%, #DFE6E9 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header Styles */
+    .header {
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      height: var(--header-height);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      font-size: 1.8rem;
+    }
+
+    .logo h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .header-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex: 1;
+      margin-top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: -100%;
+      width: 85%;
+      max-width: 320px;
+      height: calc(100vh - var(--header-height));
+      background: white;
+      border-right: 1px solid var(--border-color);
+      padding: 20px 16px;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      z-index: 900;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 800;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .new-note-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 0;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .new-note-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .note-list {
+      list-style: none;
+    }
+
+    .note-item {
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--light-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .note-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .note-item.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .note-item .note-title {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+
+    .note-item .delete-note {
+      color: var(--accent-color);
+      margin-left: 10px;
+      padding: 5px;
+    }
+
+    .note-item.active .delete-note {
+      color: white;
+    }
+
+    /* Editor Container */
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .editor-toolbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .editor-toolbar button {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .editor-toolbar button:hover {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    #note-title {
+      padding: 20px 16px;
+      font-size: 1.5rem;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      width: 100%;
+      outline: none;
+      font-weight: 600;
+      color: var(--primary-color);
+      background: white;
+    }
+
+    #note-title::placeholder {
+      color: var(--text-light);
+      opacity: 0.5;
+    }
+
+    #note-content {
+      flex: 1;
+      padding: 20px 16px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      border: none;
+      resize: none;
+      outline: none;
+      overflow-y: auto;
+      background: white;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #note-content[placeholder]:empty:before {
+      content: attr(placeholder);
+      color: var(--text-light);
+      opacity: 0.5;
+    }
+
+    .status-bar {
+      padding: 10px 16px;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .char-count-warning {
+      color: var(--warning-color);
+      font-weight: 500;
+    }
+
+    .char-count-error {
+      color: var(--error-color);
+      font-weight: 600;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      z-index: 900;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 8px 0;
+      width: 25%;
+      transition: all 0.3s;
+    }
+
+    .nav-btn i {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .nav-btn.active {
+      color: var(--primary-color);
+    }
+
+    .nav-btn:hover {
+      color: var(--primary-color);
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .modal-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      flex: 1;
+    }
+
+    .modal-btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .modal-btn-primary:hover {
+      background-color: #5C4AC9;
+    }
+
+    .modal-btn-secondary {
+      background-color: var(--light-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-btn-secondary:hover {
+      background-color: #E1E5EB;
+    }
+
+    /* Auth Modal Styles */
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .auth-tab.active {
+      border-bottom: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    /* User Info Styles */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: 10px;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+      background: linear-gradient(135deg, #2D3436 0%, #1E272E 100%);
+      color: var(--light-color);
+    }
+
+    .dark-mode .header {
+      background: linear-gradient(90deg, #5C4AC9 0%, #0088A8 100%);
+    }
+
+    .dark-mode .sidebar,
+    .dark-mode .editor-toolbar,
+    .dark-mode .status-bar,
+    .dark-mode #note-title,
+    .dark-mode #note-content {
+      background-color: var(--dark-color);
+      border-color: #444;
+      color: var(--light-color);
+    }
+
+    .dark-mode .note-item {
+      background-color: #3B3B3B;
+      color: #EEE;
+    }
+
+    .dark-mode .note-item.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .dark-mode .editor-toolbar button {
+      background-color: #3B3B3B;
+      border-color: #444;
+      color: #EEE;
+    }
+
+    .dark-mode .editor-toolbar button:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .dark-mode .bottom-nav {
+      background-color: var(--dark-color);
+      border-color: #444;
+    }
+
+    .dark-mode .modal-content {
+      background-color: #3B3B3B;
+      color: var(--light-color);
+    }
+
+    .dark-mode .modal-title {
+      color: var(--secondary-color);
+    }
+
+    .dark-mode .modal-input {
+      background-color: #2D2D2D;
+      border-color: #444;
+      color: #EEE;
+    }
+
+    .dark-mode .modal-btn-secondary {
+      background-color: #444;
+      color: #EEE;
+      border-color: #555;
+    }
+
+    .dark-mode .auth-tabs {
+      border-color: #444;
+    }
+
+    /* Alert Modal Styles */
+    .alert-modal-content {
+      text-align: center;
+    }
+
+    .alert-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .alert-icon.success {
+      color: var(--success-color);
+    }
+
+    .alert-icon.warning {
+      color: var(--warning-color);
+    }
+
+    .alert-icon.error {
+      color: var(--error-color);
+    }
+
+    .alert-message {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Save Indicator */
+    .save-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .save-indicator.unsaved {
+      color: var(--warning-color);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+
+    .slide-in {
+      animation: slideIn 0.3s ease;
+    }
+
+    /* Responsive Adjustments */
+    @media (min-width: 768px) {
+      .sidebar {
+        position: relative;
+        left: 0;
+        width: 280px;
+        max-width: none;
+        box-shadow: none;
+      }
+
+      .sidebar-overlay {
+        display: none;
+      }
+
+      .menu-btn {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .editor-toolbar {
+        padding: 10px 12px;
+      }
+
+      .editor-toolbar button {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+      }
+
+      .editor-toolbar button span {
+        display: none;
+      }
+
+      #note-title {
+        padding: 16px;
+        font-size: 1.3rem;
+      }
+
+      #note-content {
+        padding: 16px;
+        font-size: 1rem;
+        max-height: calc(100vh - var(--header-height) - var(--toolbar-height) - var(--status-height) - 60px);
+        overflow-y: auto;
+      }
+
+      .status-bar {
+        padding: 8px 16px;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .header-actions .header-btn:not(.menu-btn) {
+        display: none;
+      }
+    }
+
+    /* Utility Classes */
+    .hidden {
+      display: none !important;
+    }
+
+    .visible {
+      display: flex !important;
+    }
+
+    .text-ellipsis {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <button class="header-btn menu-btn" id="menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo-icon">📝</div>
+      <h1>My Note</h1>
+      <p><small>Versão 3.9.3</small></p>
+    </div>
+    <div class="header-actions">
+      <div class="user-info" id="user-info">
+        <div class="user-avatar" id="user-avatar"></div>
+        <span id="user-name"></span>
+      </div>
+      <button class="header-btn" id="save-note-btn" title="Salvar">
+        <i class="fas fa-save"></i>
+      </button>
+      <button class="header-btn" id="auth-btn" title="Entrar">
+        <i class="fas fa-user"></i>
+      </button>
+      <button class="header-btn" id="dark-mode-btn" title="Modo Escuro">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Suas Notas</h2>
+        <span id="note-count">0/50</span>
+      </div>
+      <button class="new-note-btn" id="new-note-btn">
+        <i class="fas fa-plus"></i> Nova Nota
+      </button>
+      <ul class="note-list" id="note-list">
+        <!-- Notes will be populated here -->
+      </ul>
+    </div>
+
+    <!-- Editor Container -->
+    <div class="editor-container">
+      <div class="editor-toolbar">
+        <button id="bold-btn" title="Negrito">
+          <i class="fas fa-bold"></i>
+        </button>
+        <button id="italic-btn" title="Itálico">
+          <i class="fas fa-italic"></i>
+        </button>
+        <button id="underline-btn" title="Sublinhado">
+          <i class="fas fa-underline"></i>
+        </button>
+      </div>
+
+      <input type="text" id="note-title" placeholder="Título da nota..." maxlength="100">
+      <div id="note-content" contenteditable="true" placeholder="Comece a escrever aqui..."></div>
+      <div class="status-bar">
+        <span id="char-count">0/10000 caracteres</span>
+        <span id="last-saved" class="save-indicator unsaved">
+          <i class="fas fa-exclamation-circle"></i> Não salvo
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-notes">
+      <i class="fas fa-sticky-note"></i>
+      <span>Notas</span>
+    </button>
+    <button class="nav-btn" id="nav-new">
+      <i class="fas fa-plus-circle"></i>
+      <span>Nova</span>
+    </button>
+    <button class="nav-btn" id="nav-save">
+      <i class="fas fa-save"></i>
+      <span>Salvar</span>
+    </button>
+    <button class="nav-btn" id="nav-theme">
+      <i class="fas fa-moon"></i>
+      <span>Tema</span>
+    </button>
+  </nav>
+
+  <!-- Modals -->
+  <div class="modal" id="new-note-modal">
+    <div class="modal-content slide-in">
+      <h3 class="modal-title">Nova Nota</h3>
+      <input type="text" class="modal-input" id="new-note-name" placeholder="Nome da nota" maxlength="100">
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" id="cancel-new-note">Cancelar</button>
+        <button class="modal-btn modal-btn-primary" id="confirm-new-note">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal" id="auth-modal">
+    <div class="modal-content slide-in">
+      <h3 class="modal-title">Acessar Minhas Notas</h3>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Entrar</div>
+        <div class="auth-tab" data-tab="register">Cadastrar</div>
+      </div>
+
+      <form class="auth-form active" id="login-form">
+        <input type="email" class="modal-input" id="login-email" placeholder="E-mail" required>
+        <input type="password" class="modal-input" id="login-password" placeholder="Senha" required>
+        <div class="modal-buttons">
+          <button type="button" class="modal-btn modal-btn-secondary" id="cancel-auth">Cancelar</button>
+          <button type="submit" class="modal-btn modal-btn-primary">Entrar</button>
+        </div>
+      </form>
+
+      <form class="auth-form" id="register-form">
+        <input type="text" class="modal-input" id="register-name" placeholder="Nome" required>
+        <input type="email" class="modal-input" id="register-email" placeholder="E-mail" required>
+        <input type="password" class="modal-input" id="register-password" placeholder="Senha (mín. 6 caracteres)" required>
+        <div class="modal-buttons">
+          <button type="button" class="modal-btn modal-btn-secondary" id="cancel-register">Cancelar</button>
+          <button type="submit" class="modal-btn modal-btn-primary">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div class="modal" id="alert-modal">
+    <div class="modal-content slide-in alert-modal-content">
+      <div class="alert-icon" id="alert-icon">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <p class="alert-message" id="alert-message"></p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-primary" id="alert-confirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal-content slide-in alert-modal-content">
+      <div class="alert-icon warning" id="confirm-icon">
+        <i class="fas fa-question-circle"></i>
+      </div>
+      <p class="alert-message" id="confirm-message"></p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" id="confirm-cancel">Cancelar</button>
+        <button class="modal-btn modal-btn-primary" id="confirm-ok">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // ==================== CONFIGURAÇÃO DO FIREBASE ====================
+      const firebaseConfig = {
+        apiKey: "AIzaSyDI4HX0oqJ9lPZg52c6TwCTinWm59-iGI0",
+        authDomain: "mynote-ba95a.firebaseapp.com",
+        projectId: "mynote-ba95a",
+        storageBucket: "mynote-ba95a.firebasestorage.app",
+        messagingSenderId: "400938152782",
+        appId: "1:400938152782:web:3e9ab76708c13f7f18241f"
+      };
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      // ==================== ELEMENTOS ====================
+      const menuBtn = document.getElementById('menu-btn');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+      const newNoteBtn = document.getElementById('new-note-btn');
+      const saveNoteBtn = document.getElementById('save-note-btn');
+      const authBtn = document.getElementById('auth-btn');
+      const darkModeBtn = document.getElementById('dark-mode-btn');
+      const noteList = document.getElementById('note-list');
+      const noteTitle = document.getElementById('note-title');
+      const noteContent = document.getElementById('note-content');
+      const charCount = document.getElementById('char-count');
+      const lastSaved = document.getElementById('last-saved');
+      const newNoteModal = document.getElementById('new-note-modal');
+      const newNoteName = document.getElementById('new-note-name');
+      const confirmNewNote = document.getElementById('confirm-new-note');
+      const cancelNewNote = document.getElementById('cancel-new-note');
+      const boldBtn = document.getElementById('bold-btn');
+      const italicBtn = document.getElementById('italic-btn');
+      const underlineBtn = document.getElementById('underline-btn');
+      const navNotes = document.getElementById('nav-notes');
+      const navNew = document.getElementById('nav-new');
+      const navSave = document.getElementById('nav-save');
+      const navTheme = document.getElementById('nav-theme');
+      const authModal = document.getElementById('auth-modal');
+      const authTabs = document.querySelectorAll('.auth-tab');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const loginEmail = document.getElementById('login-email');
+      const loginPassword = document.getElementById('login-password');
+      const registerName = document.getElementById('register-name');
+      const registerEmail = document.getElementById('register-email');
+      const registerPassword = document.getElementById('register-password');
+      const cancelAuth = document.getElementById('cancel-auth');
+      const cancelRegister = document.getElementById('cancel-register');
+      const userInfo = document.getElementById('user-info');
+      const userName = document.getElementById('user-name');
+      const userAvatar = document.getElementById('user-avatar');
+      const alertModal = document.getElementById('alert-modal');
+      const alertIcon = document.getElementById('alert-icon');
+      const alertMessage = document.getElementById('alert-message');
+      const alertConfirm = document.getElementById('alert-confirm');
+      const confirmModal = document.getElementById('confirm-modal');
+      const confirmMessage = document.getElementById('confirm-message');
+      const confirmCancel = document.getElementById('confirm-cancel');
+      const confirmOk = document.getElementById('confirm-ok');
+      let notes = [];
+      let currentNoteId = null;
+      let darkMode = localStorage.getItem('darkMode') === 'true';
+      let currentUser = null;
+      let hasUnsavedChanges = false;
+      // ==================== INICIALIZAÇÃO ====================
+      function init() {
+        // Aplicar modo escuro se estava ativo
+        if (darkMode) {
+          document.body.classList.add('dark-mode');
+          darkModeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+          navTheme.innerHTML = '<i class="fas fa-sun"></i><span>Claro</span>';
+        }
+        // Configurar limites de caracteres
+        noteTitle.setAttribute('maxlength', '100');
+        // Configurar observador de autenticação
+        auth.onAuthStateChanged(user => {
+          if (user) {
+            currentUser = user;
+            updateUserUI(user);
+            loadNotes();
+          } else {
+            currentUser = null;
+            updateUserUI(null);
+            notes = [];
+            renderNoteList();
+            noteTitle.value = '';
+            noteContent.innerHTML = '';
+            currentNoteId = null;
+            updateSaveIndicator(false);
+          }
+        });
+        // Adicionar event listeners
+        setupEventListeners();
+        // Atualizar contagem de caracteres
+        updateCharCount();
+      }
+      // ==================== MODAIS PERSONALIZADOS ====================
+      function showAlert(message, type = 'info') {
+        alertMessage.textContent = message;
+        // Definir ícone baseado no tipo
+        const iconClass = type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'success';
+        alertIcon.className = 'alert-icon ' + iconClass;
+        // Definir ícone baseado no tipo
+        if (type === 'error') {
+          alertIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+        } else if (type === 'warning') {
+          alertIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        } else if (type === 'success') {
+          alertIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        } else {
+          alertIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+        }
+        openModal(alertModal);
+        // Retornar uma promise para permitir await
+        return new Promise(resolve => {
+          alertConfirm.onclick = () => {
+            closeModal(alertModal);
+            resolve(true);
+          };
+        });
+      }
+
+      function showConfirm(message) {
+        confirmMessage.textContent = message;
+        openModal(confirmModal);
+        // Retornar uma promise para permitir await
+        return new Promise(resolve => {
+          confirmCancel.onclick = () => {
+            closeModal(confirmModal);
+            resolve(false);
+          };
+          confirmOk.onclick = () => {
+            closeModal(confirmModal);
+            resolve(true);
+          };
+        });
+      }
+      // ==================== AUTENTICAÇÃO ====================
+      function updateUserUI(user) {
+        if (user) {
+          // Usuário logado
+          userInfo.style.display = 'flex';
+          userName.textContent = user.displayName || user.email;
+          userAvatar.textContent = (user.displayName || user.email).charAt(0).toUpperCase();
+          authBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+          authBtn.title = 'Sair';
+        } else {
+          // Usuário não logado
+          userInfo.style.display = 'none';
+          authBtn.innerHTML = '<i class="fas fa-user"></i>';
+          authBtn.title = 'Entrar';
+        }
+      }
+
+      function login(email, password) {
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            closeModal(authModal);
+            loginForm.reset();
+            showAlert('Login realizado com sucesso!', 'success');
+          })
+          .catch((error) => {
+            showAlert('Erro ao entrar: ' + error.message, 'error');
+          });
+      }
+
+      function register(name, email, password) {
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Atualizar perfil do usuário com o nome
+            return userCredential.user.updateProfile({
+              displayName: name
+            });
+          })
+          .then(() => {
+            closeModal(authModal);
+            registerForm.reset();
+            showAlert('Conta criada com sucesso!', 'success');
+          })
+          .catch((error) => {
+            showAlert('Erro ao cadastrar: ' + error.message, 'error');
+          });
+      }
+
+      function logout() {
+        if (hasUnsavedChanges) {
+          showConfirm('Você tem alterações não salvas. Deseja sair mesmo assim?').then(confirmed => {
+            if (confirmed) {
+              performLogout();
+            }
+          });
+        } else {
+          performLogout();
+        }
+      }
+
+      function performLogout() {
+        auth.signOut()
+          .then(() => {
+            notes = [];
+            renderNoteList();
+            showAlert('Logout realizado com sucesso!', 'success');
+          })
+          .catch((error) => {
+            showAlert('Erro ao sair: ' + error.message, 'error');
+          });
+      }
+      // ==================== GERENCIAMENTO DE NOTAS ====================
+      function renderNoteList() {
+        noteList.innerHTML = '';
+        const notesToShow = notes.slice(0, 50); // Limite de 50 notas
+        if (notesToShow.length === 0) {
+          const message = currentUser ?
+            '<p style="text-align: center; padding: 20px; color: var(--text-light);">Nenhuma nota criada ainda</p>' :
+            '<p style="text-align: center; padding: 20px; color: var(--text-light);">Faça login para ver suas notas</p>';
+          noteList.innerHTML = message;
+          return;
+        }
+        notesToShow.forEach(note => {
+          const li = document.createElement('li');
+          li.classList.add('note-item');
+          if (note.id === currentNoteId) li.classList.add('active');
+          li.innerHTML = `
+            <span class="note-title">${note.title || 'Sem título'}</span>
+            <span class="delete-note"><i class="fas fa-trash"></i></span>
+          `;
+          li.addEventListener('click', () => {
+            if (hasUnsavedChanges) {
+              showConfirm('Você tem alterações não salvas. Deseja carregar outra nota mesmo assim?').then(confirmed => {
+                if (confirmed) {
+                  loadNote(note.id);
+                }
+              });
+            } else {
+              loadNote(note.id);
+            }
+          });
+          li.querySelector('.delete-note').addEventListener('click', e => {
+            e.stopPropagation();
+            deleteNote(note.id);
+          });
+          noteList.appendChild(li);
+        });
+        document.getElementById('note-count').textContent = `${notesToShow.length}/50 notas`;
+        updateCharCount();
+      }
+
+      function updateCharCount() {
+        const count = noteContent.textContent.length;
+        charCount.textContent = `${count}/10000 caracteres`;
+        if (count > 9500) {
+          charCount.classList.add('char-count-warning');
+        } else {
+          charCount.classList.remove('char-count-warning');
+        }
+        if (count > 10000) {
+          charCount.classList.add('char-count-error');
+        } else {
+          charCount.classList.remove('char-count-error');
+        }
+      }
+
+      function updateSaveIndicator(isSaved) {
+        hasUnsavedChanges = !isSaved;
+        if (isSaved) {
+          lastSaved.innerHTML = '<i class="fas fa-check-circle"></i> Salvo';
+          lastSaved.classList.remove('unsaved');
+        } else {
+          lastSaved.innerHTML = '<i class="fas fa-exclamation-circle"></i> Não salvo';
+          lastSaved.classList.add('unsaved');
+        }
+      }
+
+      function loadNote(id) {
+        const note = notes.find(n => n.id === id);
+        if (!note) return;
+        currentNoteId = id;
+        noteTitle.value = note.title;
+        noteContent.innerHTML = note.content;
+        renderNoteList();
+        updateSaveIndicator(true);
+        // Fechar a sidebar em mobile após selecionar uma nota
+        if (window.innerWidth < 768) {
+          closeSidebar();
+        }
+      }
+
+      function saveCurrentNote() {
+        if (!currentUser) {
+          showAlert('Faça login para salvar notas', 'warning').then(() => {
+            openModal(authModal);
+          });
+          return;
+        }
+        if (!noteTitle.value.trim() && !noteContent.textContent.trim()) {
+          showAlert('A nota não pode estar vazia', 'warning');
+          return;
+        }
+        // Verificar limite de caracteres
+        if (noteContent.textContent.length > 10000) {
+          showAlert('Limite de 10000 caracteres excedido. Por favor, reduza o texto.', 'error');
+          return;
+        }
+        const noteData = {
+          title: noteTitle.value,
+          content: noteContent.innerHTML,
+          updatedAt: new Date().toISOString()
+        };
+        if (currentNoteId) {
+          // Atualizar nota existente
+          db.collection('users').doc(currentUser.uid)
+            .collection('notes').doc(currentNoteId)
+            .update(noteData)
+            .then(() => {
+              const index = notes.findIndex(n => n.id === currentNoteId);
+              if (index !== -1) {
+                notes[index] = {
+                  id: currentNoteId,
+                  ...noteData
+                };
+              }
+              updateSaveIndicator(true);
+              renderNoteList();
+              showAlert('Nota salva com sucesso!', 'success');
+            })
+            .catch(error => {
+              console.error('Erro ao atualizar nota:', error);
+              showAlert('Erro ao salvar nota', 'error');
+            });
+        } else {
+          // Criar nova nota
+          const newNoteRef = db.collection('users').doc(currentUser.uid)
+            .collection('notes').doc();
+          newNoteRef.set(noteData)
+            .then(() => {
+              currentNoteId = newNoteRef.id;
+              notes.unshift({
+                id: currentNoteId,
+                ...noteData
+              });
+              saveToLocalStorage();
+              updateSaveIndicator(true);
+              renderNoteList();
+              showAlert('Nota criada com sucesso!', 'success');
+            })
+            .catch(error => {
+              console.error('Erro ao criar nota:', error);
+              showAlert('Erro ao criar nota', 'error');
+            });
+        }
+      }
+      async function deleteNote(id) {
+        const confirmed = await showConfirm('Tem certeza que deseja excluir esta nota?');
+        if (!confirmed) return;
+        db.collection('users').doc(currentUser.uid)
+          .collection('notes').doc(id)
+          .delete()
+          .then(() => {
+            notes = notes.filter(note => note.id !== id);
+            if (currentNoteId === id) {
+              noteTitle.value = '';
+              noteContent.innerHTML = '';
+              currentNoteId = null;
+              updateSaveIndicator(false);
+            }
+            renderNoteList();
+            showAlert('Nota excluída com sucesso', 'success');
+          })
+          .catch(error => {
+            console.error('Erro ao excluir nota:', error);
+            showAlert('Erro ao excluir nota', 'error');
+          });
+      }
+
+      function loadNotes() {
+        if (!currentUser) {
+          notes = [];
+          renderNoteList();
+          return;
+        }
+        db.collection('users').doc(currentUser.uid)
+          .collection('notes')
+          .orderBy('updatedAt', 'desc')
+          .get()
+          .then(querySnapshot => {
+            notes = [];
+            querySnapshot.forEach(doc => {
+              notes.push({
+                id: doc.id,
+                ...doc.data()
+              });
+            });
+            renderNoteList();
+            // Carregar a última nota editada se existir
+            const lastNoteId = localStorage.getItem('lastNoteId');
+            if (lastNoteId) {
+              const noteExists = notes.some(note => note.id === lastNoteId);
+              if (noteExists) {
+                loadNote(lastNoteId);
+              } else if (notes.length > 0) {
+                loadNote(notes[0].id);
+              }
+            } else if (notes.length > 0) {
+              loadNote(notes[0].id);
+            }
+          })
+          .catch(error => {
+            console.error('Erro ao carregar notas:', error);
+            showAlert('Erro ao carregar notas', 'error');
+          });
+      }
+
+      function saveToLocalStorage() {
+        if (currentNoteId) {
+          localStorage.setItem('lastNoteId', currentNoteId);
+        }
+      }
+      async function createNewNote(title) {
+        if (!currentUser) {
+          await showAlert('Faça login para criar notas', 'warning');
+          openModal(authModal);
+          return;
+        }
+        if (!title.trim()) {
+          showAlert('O título não pode ser vazio', 'warning');
+          return;
+        }
+        if (hasUnsavedChanges) {
+          const confirmed = await showConfirm('Você tem alterações não salvas. Deseja criar uma nova nota mesmo assim?');
+          if (!confirmed) return;
+        }
+        noteTitle.value = title;
+        noteContent.innerHTML = '';
+        currentNoteId = null;
+        updateSaveIndicator(false);
+        closeModal(newNoteModal);
+        newNoteName.value = '';
+        // Dar foco ao conteúdo para começar a editar
+        setTimeout(() => {
+          noteContent.focus();
+        }, 100);
+      }
+      // ==================== INTERFACE ====================
+      function setupEventListeners() {
+        // Menu e sidebar
+        menuBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        // Notas
+        newNoteBtn.addEventListener('click', () => {
+          if (!currentUser) {
+            showAlert('Faça login para criar notas', 'warning').then(() => {
+              openModal(authModal);
+            });
+          } else {
+            openModal(newNoteModal);
+          }
+        });
+        confirmNewNote.addEventListener('click', () => createNewNote(newNoteName.value));
+        cancelNewNote.addEventListener('click', () => closeModal(newNoteModal));
+        // Salvamento manual
+        saveNoteBtn.addEventListener('click', saveCurrentNote);
+        // Detectar alterações para mostrar indicador de não salvo
+        noteContent.addEventListener('input', () => {
+          updateCharCount();
+          updateSaveIndicator(false);
+        });
+        noteTitle.addEventListener('input', () => {
+          // Limitar a 100 caracteres
+          if (noteTitle.value.length > 100) {
+            noteTitle.value = noteTitle.value.substring(0, 100);
+            showAlert('Limite de 100 caracteres para o título', 'warning');
+          }
+          updateSaveIndicator(false);
+        });
+        // Formatação
+        boldBtn.addEventListener('click', () => formatText('bold'));
+        italicBtn.addEventListener('click', () => formatText('italic'));
+        underlineBtn.addEventListener('click', () => formatText('underline'));
+        // Autenticação
+        authBtn.addEventListener('click', () => {
+          if (currentUser) {
+            logout();
+          } else {
+            openModal(authModal);
+          }
+        });
+        // Alternar entre login e registro
+        authTabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const tabName = tab.getAttribute('data-tab');
+            authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.auth-form').forEach(form => {
+              form.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-form`).classList.add('active');
+          });
+        });
+        // Formulários de autenticação
+        loginForm.addEventListener('submit', e => {
+          e.preventDefault();
+          login(loginEmail.value, loginPassword.value);
+        });
+        registerForm.addEventListener('submit', e => {
+          e.preventDefault();
+          if (registerPassword.value.length < 6) {
+            showAlert('A senha deve ter pelo menos 6 caracteres', 'warning');
+            return;
+          }
+          register(registerName.value, registerEmail.value, registerPassword.value);
+        });
+        cancelAuth.addEventListener('click', () => {
+          closeModal(authModal);
+          loginForm.reset();
+        });
+        cancelRegister.addEventListener('click', () => {
+          closeModal(authModal);
+          registerForm.reset();
+        });
+        // Dark Mode
+        darkModeBtn.addEventListener('click', toggleDarkMode);
+        // Navegação inferior
+        navNotes.addEventListener('click', () => {
+          setActiveNav(navNotes);
+          toggleSidebar();
+        });
+        navNew.addEventListener('click', () => {
+          setActiveNav(navNew);
+          if (!currentUser) {
+            showAlert('Faça login para criar notas', 'warning').then(() => {
+              openModal(authModal);
+            });
+          } else {
+            openModal(newNoteModal);
+          }
+        });
+        navSave.addEventListener('click', () => {
+          setActiveNav(navSave);
+          saveCurrentNote();
+        });
+        navTheme.addEventListener('click', () => {
+          setActiveNav(navTheme);
+          toggleDarkMode();
+        });
+        // Fechar modais ao clicar fora
+        document.addEventListener('click', (e) => {
+          if (e.target.classList.contains('modal')) {
+            closeModal(e.target);
+          }
+        });
+        // Tecla Escape para fechar modais
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal[style="display: flex;"]');
+            if (openModal) {
+              closeModal(openModal);
+            }
+          }
+        });
+      }
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+
+      function openModal(modal) {
+        modal.style.display = 'flex';
+      }
+
+      function closeModal(modal) {
+        modal.style.display = 'none';
+      }
+
+      function toggleDarkMode() {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-mode', darkMode);
+        localStorage.setItem('darkMode', darkMode);
+        if (darkMode) {
+          darkModeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+          navTheme.innerHTML = '<i class="fas fa-sun"></i><span>Claro</span>';
+        } else {
+          darkModeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+          navTheme.innerHTML = '<i class="fas fa-moon"></i><span>Escuro</span>';
+        }
+      }
+
+      function setActiveNav(activeNav) {
+        // Remove active class from all nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        // Add active class to clicked nav button
+        activeNav.classList.add('active');
+      }
+
+      function formatText(command) {
+        document.execCommand(command, false, null);
+        noteContent.focus();
+        updateSaveIndicator(false);
+      }
+      // Inicializar a aplicação
+      init();
+    });
+  </script>
+</body>
+
+</html>
