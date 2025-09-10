@@ -52,5 +52,4 @@ Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvi
 
 ---
 
-## 📦 Estrutura do projeto
 
