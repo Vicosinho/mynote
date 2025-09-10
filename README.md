@@ -1,15 +1,17 @@
 # 📝 MY NOTE - Aplicativo de Notas
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)  
-![GitHub stars](https://img.shields.io/github/stars/SEU_USUARIO/my-note?style=social)  
-![GitHub issues](https://img.shields.io/github/issues/SEU_USUARIO/my-note)  
-![GitHub forks](https://img.shields.io/github/forks/SEU_USUARIO/my-note?style=social)  
+![GitHub stars](https://img.shields.io/github/stars/viquinho/my-note?style=social)  
+![GitHub issues](https://img.shields.io/github/issues/viquinho/my-note)  
+![GitHub forks](https://img.shields.io/github/forks/viquinho/my-note?style=social)  
 ![Made with HTML5](https://img.shields.io/badge/Made%20with-HTML5-orange?logo=html5)  
 ![Made with CSS3](https://img.shields.io/badge/Made%20with-CSS3-blue?logo=css3)  
 ![Made with JavaScript](https://img.shields.io/badge/Made%20with-JavaScript-yellow?logo=javascript)  
 ![Firebase](https://img.shields.io/badge/Firebase-0059?logo=firebase)  
 
 Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvido com foco em dispositivos móveis mas totalmente funcional em desktop.  
+
+👉 **[Acesse o aplicativo aqui]([https://viquinho.github.io/my-note/](https://rawcdn.githack.com/Vicosinho/mynote/refs/heads/main/html/5.9)**  
 
 ---
 
@@ -49,5 +51,3 @@ Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvi
 - **Google Fonts (Poppins)** – Tipografia  
 
 ---
-
-👉 **[Acesse o aplicativo aqui]([https://SEU_USUARIO.github.io/my-note/](https://rawcdn.githack.com/Vicosinho/mynote/refs/heads/main/html/5.9))** 
