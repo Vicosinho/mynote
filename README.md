@@ -11,7 +11,7 @@
 
 Um aplicativo web responsivo para criação e gerenciamento de notas, desenvolvido com foco em dispositivos móveis mas totalmente funcional em desktop.  
 
-👉 **[Acesse o aplicativo aqui]([https://viquinho.github.io/my-note/](https://rawcdn.githack.com/Vicosinho/mynote/refs/heads/main/html/5.9))**  
+👉 ** Acesse o aplicativo aqui ** https://rawcdn.githack.com/Vicosinho/mynote/refs/heads/main/html/5.9
 
 ---
 
