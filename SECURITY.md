@@ -48,7 +48,7 @@ Envie um e-mail para **vicentebajay@gmail.com** com as seguintes informações:
 
 ## Recompensas
 
-Atualmente não oferecemos um programa formal de recompensa. Reconhecimentos públicos poderão ser oferecidos no arquivo `SECURITY_ACKNOWLEDGEMENTS.md` quando o pesquisador concordar.
+Atualmente não oferecemos recompensa.
 
 ## Divulgação coordenada
 
